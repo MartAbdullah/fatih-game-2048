@@ -98,7 +98,7 @@ body {
 }
 
 .tile {
-    background: rgba(238, 228, 218, 0.35);
+    background: #cdc1b4;
     border-radius: 3px;
     display: flex;
     justify-content: center;

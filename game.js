@@ -259,7 +259,7 @@ class Game2048 {
         for (let row = 0; row < 4; row++) {
             for (let col = 0; col < 4; col++) {
                 if (this.grid[row][col] === 2048) {
-                    this.showMessage('Je hebt gewonnen! 🎉');
+                    this.showMessage('You Win! 🎉');
                     return;
                 }
             }
@@ -275,7 +275,7 @@ class Game2048 {
             }
         }
 
-        this.showMessage('Spel Afgelopen!');
+        this.showMessage('Game Over!');
     }
 
     showMessage(text) {

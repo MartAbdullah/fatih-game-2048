@@ -1,30 +1,30 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spel van Fatih</title>
+    <title>Game of Fatih</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="title">Spel van Fatih</div>
+            <div class="title">Game of Fatih</div>
             <div class="scores">
                 <div class="score-container">
                     <div class="score-label">SCORE</div>
                     <div id="score" class="score-value">0</div>
                 </div>
                 <div class="score-container">
-                    <div class="score-label">BESTE</div>
+                    <div class="score-label">BEST</div>
                     <div id="best" class="score-value">0</div>
                 </div>
             </div>
         </div>
         
         <div class="game-intro">
-            <p>Gebruik <strong>pijltjestoetsen</strong> om tegels te combineren!</p>
-            <button id="newGame" class="new-game-btn">Nieuw Spel</button>
+            <p>Use <strong>arrow keys</strong> to merge tiles!</p>
+            <button id="newGame" class="new-game-btn">New Game</button>
         </div>
 
         <div id="gameBoard" class="game-board">
@@ -32,14 +32,14 @@
         </div>
 
         <div class="game-controls">
-            <button id="undoBtn" class="control-btn" title="Ongedaan maken">↶</button>
-            <button id="shuffleBtn" class="control-btn" title="Schudden">⇄</button>
-            <button id="gridBtn" class="control-btn" title="Rooster">⚏</button>
+            <button id="undoBtn" class="control-btn" title="Undo">↶</button>
+            <button id="shuffleBtn" class="control-btn" title="Shuffle">⇄</button>
+            <button id="gridBtn" class="control-btn" title="Grid">⚏</button>
         </div>
 
         <div class="game-message" id="gameMessage">
             <p></p>
-            <button class="retry-btn">Opnieuw Proberen</button>
+            <button class="retry-btn">Try Again</button>
         </div>
     </div>
 
