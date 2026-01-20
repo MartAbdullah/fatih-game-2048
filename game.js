@@ -9,17 +9,21 @@ class Game2048 {
         this.previousState = null;
         this.hintPopup = document.getElementById('hintPopup');
         this.hintTimeout = null;
+        this.leaderboard = this.loadLeaderboard();
+        this.playerName = this.loadPlayerName();
         
         this.init();
     }
 
     init() {
+        this.ensurePlayerName();
         this.createBoard();
         this.addRandomTile();
         this.addRandomTile();
         this.updateDisplay();
         this.setupEventListeners();
         this.updateBestScore();
+        this.renderLeaderboard();
     }
 
     createBoard() {
@@ -458,6 +462,92 @@ class Game2048 {
         this.updateBestScore();
     }
 
+    // --- Leaderboard ---
+    loadLeaderboard() {
+        try {
+            const saved = localStorage.getItem('leaderboard');
+            if (saved) return JSON.parse(saved);
+        } catch (e) {
+            console.error('Failed to load leaderboard', e);
+        }
+        return [];
+    }
+
+    saveLeaderboard() {
+        try {
+            localStorage.setItem('leaderboard', JSON.stringify(this.leaderboard));
+        } catch (e) {
+            console.error('Failed to save leaderboard', e);
+        }
+    }
+
+    updateLeaderboard() {
+        const name = this.playerName || 'Player';
+        this.leaderboard.push({ name, score: this.score });
+        this.leaderboard.sort((a, b) => b.score - a.score);
+        this.leaderboard = this.leaderboard.slice(0, 3);
+        this.saveLeaderboard();
+        this.renderLeaderboard();
+    }
+
+    // --- Player name ---
+    loadPlayerName() {
+        try {
+            return localStorage.getItem('playerName') || '';
+        } catch (e) {
+            return '';
+        }
+    }
+
+    savePlayerName(name) {
+        this.playerName = name;
+        try {
+            localStorage.setItem('playerName', name);
+        } catch (e) {
+            console.error('Failed to save player name', e);
+        }
+    }
+
+    ensurePlayerName(force = false) {
+        if (!this.playerName || force) {
+            this.promptPlayerName();
+        }
+    }
+
+    promptPlayerName() {
+        const input = prompt('Enter your name:', this.playerName || 'Player');
+        const name = (input || '').trim();
+        if (name) {
+            this.savePlayerName(name);
+        } else if (!this.playerName) {
+            this.savePlayerName('Player');
+        }
+    }
+
+    renderLeaderboard() {
+        const list = document.getElementById('leaderboardList');
+        if (!list) return;
+        list.innerHTML = '';
+        if (!this.leaderboard.length) {
+            const li = document.createElement('li');
+            li.textContent = 'No scores yet';
+            list.appendChild(li);
+            return;
+        }
+        this.leaderboard.forEach(item => {
+            const li = document.createElement('li');
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'name';
+            nameSpan.textContent = item.name;
+            const scoreSpan = document.createElement('span');
+            scoreSpan.className = 'score';
+            scoreSpan.textContent = item.score;
+            li.appendChild(nameSpan);
+            li.appendChild(scoreSpan);
+            list.appendChild(li);
+        });
+    }
+
     updateBestScore() {
         if (this.score > this.bestScore) {
             this.bestScore = this.score;
@@ -471,7 +561,7 @@ class Game2048 {
         for (let row = 0; row < 4; row++) {
             for (let col = 0; col < 4; col++) {
                 if (this.grid[row][col] === 2048) {
-                    this.showMessage('You Win! 🎉');
+                    this.handleGameEnd('win');
                     return;
                 }
             }
@@ -487,7 +577,7 @@ class Game2048 {
             }
         }
 
-        this.showMessage('Game Over!');
+        this.handleGameEnd('lose');
     }
 
     showMessage(text) {
@@ -509,6 +599,12 @@ class Game2048 {
         this.addRandomTile();
         this.addRandomTile();
         this.updateDisplay();
+    }
+
+    handleGameEnd(state) {
+        const text = state === 'win' ? 'You Win! 🎉' : 'Game Over!';
+        this.updateLeaderboard();
+        this.showMessage(text);
     }
 }
 

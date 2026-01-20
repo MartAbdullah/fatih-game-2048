@@ -201,6 +201,45 @@ body {
     margin-bottom: 20px;
 }
 
+.leaderboard {
+    background: #f0e9df;
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 16px;
+    color: #776e65;
+    text-align: left;
+}
+
+.leaderboard-title {
+    font-weight: bold;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+.leaderboard ol {
+    margin: 0;
+    padding-left: 18px;
+    display: grid;
+    gap: 6px;
+}
+
+.leaderboard li {
+    font-size: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.leaderboard .name {
+    font-weight: 600;
+}
+
+.leaderboard .score {
+    font-weight: 700;
+}
+
 .retry-btn {
     background: #8f7a66;
     color: #f9f6f2;
