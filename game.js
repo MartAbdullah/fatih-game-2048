@@ -154,7 +154,7 @@ class Game2048 {
     }
 
     hasAnyMove() {
-        // reuse checkGameOver logic: if any zero or equal neighbor, move exists
+        // Quick check: empty or adjacent equals
         for (let row = 0; row < 4; row++) {
             for (let col = 0; col < 4; col++) {
                 if (this.grid[row][col] === 0) return true;
@@ -162,7 +162,9 @@ class Game2048 {
                 if (row < 3 && this.grid[row][col] === this.grid[row + 1][col]) return true;
             }
         }
-        return false;
+        // Fallback: try simulated moves to be safe
+        const dirs = ['left', 'right', 'up', 'down'];
+        return dirs.some(d => this.computeMove(d).moved);
     }
 
     findBestMove() {
@@ -178,6 +180,7 @@ class Game2048 {
                 if (res.moved) return { direction: d, gain: res.gain, moved: true };
             }
         }
+        // If still no move found, signal no-move
         return best;
     }
 
@@ -248,8 +251,12 @@ class Game2048 {
             if (!this.hasAnyMove()) {
                 this.showHintPopup('No moves available');
             } else {
-                // Fallback: suggest LEFT to avoid silent failure
-                this.showHintPopup('Try LEFT ←');
+                // Fallback to a legal direction if evaluation failed
+                const dirs = ['left', 'right', 'up', 'down'];
+                const legal = dirs.find(d => this.computeMove(d).moved);
+                const arrowMap = { left: '←', right: '→', up: '↑', down: '↓' };
+                const dir = legal || 'left';
+                this.showHintPopup(`Try ${dir.toUpperCase()} ${arrowMap[dir] || ''}`);
             }
             return;
         }

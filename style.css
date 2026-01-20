@@ -221,7 +221,7 @@ body {
 .hint-popup {
     position: fixed;
     left: 50%;
-    bottom: 90px;
+    bottom: 160px; /* lift above control buttons */
     transform: translateX(-50%);
     background: #8f7a66;
     color: #f9f6f2;
