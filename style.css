@@ -217,6 +217,24 @@ body {
     background: #9f8a76;
 }
 
+/* Hint popup */
+.hint-popup {
+    position: fixed;
+    left: 50%;
+    bottom: 90px;
+    transform: translateX(-50%);
+    background: #8f7a66;
+    color: #f9f6f2;
+    border-radius: 24px;
+    padding: 10px 16px;
+    font-weight: bold;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    display: none;
+    z-index: 200;
+}
+
+.hint-popup.show { display: inline-block; }
+
 @media (max-width: 520px) {
     .title {
         font-size: 50px;

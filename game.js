@@ -7,6 +7,8 @@ class Game2048 {
         this.scoreElement = document.getElementById('score');
         this.bestElement = document.getElementById('best');
         this.previousState = null;
+        this.hintPopup = document.getElementById('hintPopup');
+        this.hintTimeout = null;
         
         this.init();
     }
@@ -39,7 +41,7 @@ class Game2048 {
         const shuffleBtn = document.getElementById('shuffleBtn');
         if (shuffleBtn) shuffleBtn.addEventListener('click', () => this.shuffle());
         const gridBtn = document.getElementById('gridBtn');
-        if (gridBtn) gridBtn.addEventListener('click', () => this.toggleGrid());
+        if (gridBtn) gridBtn.addEventListener('click', () => this.showHint());
         
         // Touch support for mobile
         let touchStartX = 0;
@@ -104,12 +106,151 @@ class Game2048 {
             const p = positions[i];
             this.grid[p.r][p.c] = values[i];
         }
+        // After shuffle, spawn a new tile
+        this.addRandomTile();
         this.updateDisplay();
     }
 
-    toggleGrid() {
-        // Toggle helper outline for tiles
-        this.gameBoard.classList.toggle('show-grid');
+    // --- Hints ---
+    simulateSlideAndMerge(line) {
+        const nonZero = line.filter(v => v !== 0);
+        let gain = 0;
+        for (let i = 0; i < nonZero.length - 1; i++) {
+            if (nonZero[i] === nonZero[i + 1]) {
+                nonZero[i] *= 2;
+                gain += nonZero[i];
+                nonZero.splice(i + 1, 1);
+            }
+        }
+        while (nonZero.length < 4) nonZero.push(0);
+        return { newLine: nonZero, gain };
+    }
+
+    evaluateMove(direction) {
+        let moved = false;
+        let totalGain = 0;
+        if (direction === 'left' || direction === 'right') {
+            for (let r = 0; r < 4; r++) {
+                let line = this.grid[r].slice();
+                if (direction === 'right') line = line.slice().reverse();
+                const { newLine, gain } = this.simulateSlideAndMerge(line);
+                totalGain += gain;
+                const finalLine = direction === 'right' ? newLine.slice().reverse() : newLine;
+                if (JSON.stringify(finalLine) !== JSON.stringify(this.grid[r])) moved = true;
+            }
+        } else {
+            for (let c = 0; c < 4; c++) {
+                let col = [this.grid[0][c], this.grid[1][c], this.grid[2][c], this.grid[3][c]];
+                if (direction === 'down') col = col.slice().reverse();
+                const { newLine, gain } = this.simulateSlideAndMerge(col);
+                totalGain += gain;
+                const finalCol = direction === 'down' ? newLine.slice().reverse() : newLine;
+                if (JSON.stringify(finalCol) !== JSON.stringify([this.grid[0][c], this.grid[1][c], this.grid[2][c], this.grid[3][c]])) moved = true;
+            }
+        }
+        return { moved, gain: totalGain };
+    }
+
+    findBestMove() {
+        const dirs = ['left', 'right', 'up', 'down'];
+        let best = { direction: null, gain: -1, moved: false };
+        for (const d of dirs) {
+            const res = this.evaluateMove(d);
+            if (res.moved && res.gain > best.gain) best = { direction: d, gain: res.gain, moved: true };
+        }
+        if (!best.moved) {
+            // pick any legal move
+            for (const d of dirs) {
+                const res = this.evaluateMove(d);
+                if (res.moved) return { direction: d, gain: 0, moved: true };
+            }
+        }
+        return best;
+    }
+
+    clearHints() {
+        const tiles = this.gameBoard.querySelectorAll('.tile');
+        tiles.forEach(t => t.classList.remove('hint'));
+    }
+
+    highlightMergePairs(direction) {
+        this.clearHints();
+        const tiles = this.gameBoard.querySelectorAll('.tile');
+        const addHint = (r, c) => {
+            const idx = r * 4 + c;
+            if (tiles[idx]) tiles[idx].classList.add('hint');
+        };
+        if (direction === 'left') {
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    if (this.grid[r][c] === 0) continue;
+                    // find next non-zero to the right
+                    for (let k = c + 1; k < 4; k++) {
+                        if (this.grid[r][k] === 0) continue;
+                        if (this.grid[r][k] === this.grid[r][c]) { addHint(r, c); addHint(r, k); }
+                        break;
+                    }
+                }
+            }
+        } else if (direction === 'right') {
+            for (let r = 0; r < 4; r++) {
+                for (let c = 3; c >= 0; c--) {
+                    if (this.grid[r][c] === 0) continue;
+                    for (let k = c - 1; k >= 0; k--) {
+                        if (this.grid[r][k] === 0) continue;
+                        if (this.grid[r][k] === this.grid[r][c]) { addHint(r, c); addHint(r, k); }
+                        break;
+                    }
+                }
+            }
+        } else if (direction === 'up') {
+            for (let c = 0; c < 4; c++) {
+                for (let r = 0; r < 4; r++) {
+                    if (this.grid[r][c] === 0) continue;
+                    for (let k = r + 1; k < 4; k++) {
+                        if (this.grid[k][c] === 0) continue;
+                        if (this.grid[k][c] === this.grid[r][c]) { addHint(r, c); addHint(k, c); }
+                        break;
+                    }
+                }
+            }
+        } else if (direction === 'down') {
+            for (let c = 0; c < 4; c++) {
+                for (let r = 3; r >= 0; r--) {
+                    if (this.grid[r][c] === 0) continue;
+                    for (let k = r - 1; k >= 0; k--) {
+                        if (this.grid[k][c] === 0) continue;
+                        if (this.grid[k][c] === this.grid[r][c]) { addHint(r, c); addHint(k, c); }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    showHint() {
+        const best = self.findBestMove ? this.findBestMove() : null;
+        if (!best || !best.moved) {
+            this.clearHints();
+            this.showHintPopup('No moves available');
+            return;
+        }
+        this.highlightMergePairs(best.direction);
+        const arrowMap = { left: '←', right: '→', up: '↑', down: '↓' };
+        const text = `Hint: ${best.direction.toUpperCase()} ${arrowMap[best.direction]}`;
+        this.showHintPopup(text);
+        // auto-clear tile hints after a while
+        setTimeout(() => this.clearHints(), 1200);
+    }
+
+    showHintPopup(text) {
+        if (!this.hintPopup) return;
+        this.hintPopup.textContent = text;
+        this.hintPopup.classList.add('show');
+        if (this.hintTimeout) clearTimeout(this.hintTimeout);
+        this.hintTimeout = setTimeout(() => {
+            this.hintPopup.classList.remove('show');
+        }, 1500);
     }
 
     handleKeyPress(e) {
