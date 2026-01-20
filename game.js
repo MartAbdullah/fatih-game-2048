@@ -653,7 +653,7 @@ class Game2048 {
             this.addRandomTile();
             this.addRandomTile();
             this.updateDisplay();
-        }, 4000);
+        }, 2000);
     }
 }
 
