@@ -112,57 +112,70 @@ class Game2048 {
     }
 
     // --- Hints ---
-    simulateSlideAndMerge(line) {
-        const nonZero = line.filter(v => v !== 0);
-        let gain = 0;
-        for (let i = 0; i < nonZero.length - 1; i++) {
-            if (nonZero[i] === nonZero[i + 1]) {
-                nonZero[i] *= 2;
-                gain += nonZero[i];
-                nonZero.splice(i + 1, 1);
-            }
-        }
-        while (nonZero.length < 4) nonZero.push(0);
-        return { newLine: nonZero, gain };
-    }
-
-    evaluateMove(direction) {
+    computeMove(direction) {
+        const clone = this.grid.map(r => r.slice());
         let moved = false;
-        let totalGain = 0;
+        let gain = 0;
+
+        const slideMerge = (line) => {
+            const arr = line.filter(v => v !== 0);
+            for (let i = 0; i < arr.length - 1; i++) {
+                if (arr[i] === arr[i + 1]) {
+                    arr[i] *= 2;
+                    gain += arr[i];
+                    arr.splice(i + 1, 1);
+                }
+            }
+            while (arr.length < 4) arr.push(0);
+            return arr;
+        };
+
         if (direction === 'left' || direction === 'right') {
             for (let r = 0; r < 4; r++) {
-                let line = this.grid[r].slice();
+                let line = clone[r].slice();
                 if (direction === 'right') line = line.slice().reverse();
-                const { newLine, gain } = this.simulateSlideAndMerge(line);
-                totalGain += gain;
-                const finalLine = direction === 'right' ? newLine.slice().reverse() : newLine;
-                if (JSON.stringify(finalLine) !== JSON.stringify(this.grid[r])) moved = true;
+                const merged = slideMerge(line);
+                const finalLine = direction === 'right' ? merged.slice().reverse() : merged;
+                if (JSON.stringify(finalLine) !== JSON.stringify(clone[r])) moved = true;
+                clone[r] = finalLine;
             }
         } else {
             for (let c = 0; c < 4; c++) {
-                let col = [this.grid[0][c], this.grid[1][c], this.grid[2][c], this.grid[3][c]];
+                let col = [clone[0][c], clone[1][c], clone[2][c], clone[3][c]];
                 if (direction === 'down') col = col.slice().reverse();
-                const { newLine, gain } = this.simulateSlideAndMerge(col);
-                totalGain += gain;
-                const finalCol = direction === 'down' ? newLine.slice().reverse() : newLine;
-                if (JSON.stringify(finalCol) !== JSON.stringify([this.grid[0][c], this.grid[1][c], this.grid[2][c], this.grid[3][c]])) moved = true;
+                const merged = slideMerge(col);
+                const finalCol = direction === 'down' ? merged.slice().reverse() : merged;
+                if (JSON.stringify(finalCol) !== JSON.stringify([clone[0][c], clone[1][c], clone[2][c], clone[3][c]])) moved = true;
+                for (let r = 0; r < 4; r++) clone[r][c] = finalCol[r];
             }
         }
-        return { moved, gain: totalGain };
+
+        return { moved, gain };
+    }
+
+    hasAnyMove() {
+        // reuse checkGameOver logic: if any zero or equal neighbor, move exists
+        for (let row = 0; row < 4; row++) {
+            for (let col = 0; col < 4; col++) {
+                if (this.grid[row][col] === 0) return true;
+                if (col < 3 && this.grid[row][col] === this.grid[row][col + 1]) return true;
+                if (row < 3 && this.grid[row][col] === this.grid[row + 1][col]) return true;
+            }
+        }
+        return false;
     }
 
     findBestMove() {
         const dirs = ['left', 'right', 'up', 'down'];
         let best = { direction: null, gain: -1, moved: false };
         for (const d of dirs) {
-            const res = this.evaluateMove(d);
+            const res = this.computeMove(d);
             if (res.moved && res.gain > best.gain) best = { direction: d, gain: res.gain, moved: true };
         }
         if (!best.moved) {
-            // pick any legal move
             for (const d of dirs) {
-                const res = this.evaluateMove(d);
-                if (res.moved) return { direction: d, gain: 0, moved: true };
+                const res = this.computeMove(d);
+                if (res.moved) return { direction: d, gain: res.gain, moved: true };
             }
         }
         return best;
@@ -232,7 +245,12 @@ class Game2048 {
         const best = this.findBestMove();
         if (!best || !best.moved) {
             this.clearHints();
-            this.showHintPopup('No moves available');
+            if (!this.hasAnyMove()) {
+                this.showHintPopup('No moves available');
+            } else {
+                // Fallback: suggest LEFT to avoid silent failure
+                this.showHintPopup('Try LEFT ←');
+            }
             return;
         }
         this.highlightMergePairs(best.direction);
