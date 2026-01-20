@@ -115,9 +115,9 @@ body {
     animation: appear 0.2s;
 }
 
-/* Toggle stronger grid outline when .show-grid is set on board */
-.game-board.show-grid .tile {
-    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.08);
+/* Hint highlight for suggested merge tiles */
+.tile.hint {
+    box-shadow: inset 0 0 0 3px rgba(143, 122, 102, 0.9), 0 0 10px rgba(143, 122, 102, 0.4);
 }
 
 /* Tile colors */
