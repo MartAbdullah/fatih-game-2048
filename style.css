@@ -178,6 +178,55 @@ body {
     cursor: not-allowed;
 }
 
+/* Modal */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: #f9f6f2;
+    padding: 20px;
+    border-radius: 6px;
+    width: 90%;
+    max-width: 320px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    display: grid;
+    gap: 12px;
+    text-align: center;
+}
+
+.modal-content h3 {
+    margin: 0;
+    color: #776e65;
+}
+
+#nameInput {
+    padding: 10px 12px;
+    border: 1px solid #d8d0c4;
+    border-radius: 4px;
+    font-size: 16px;
+    outline: none;
+}
+
+#nameInput:focus {
+    border-color: #8f7a66;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+}
+
 .leaderboard-widget {
     background: #f0e9df;
     border-radius: 6px;

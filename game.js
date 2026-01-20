@@ -11,6 +11,7 @@ class Game2048 {
         this.hintTimeout = null;
         this.leaderboard = this.loadLeaderboard();
         this.playerName = this.loadPlayerName();
+        this.afterNameCallback = null;
         this.isActive = true;
         
         this.init();
@@ -26,6 +27,7 @@ class Game2048 {
         this.updateBestScore();
         this.renderLeaderboard();
         this.setControlsEnabled(true);
+        this.ensurePlayerName(false);
     }
 
     createBoard() {
@@ -50,6 +52,18 @@ class Game2048 {
         if (shuffleBtn) shuffleBtn.addEventListener('click', () => this.shuffle());
         const gridBtn = document.getElementById('gridBtn');
         if (gridBtn) gridBtn.addEventListener('click', () => this.showHint());
+
+        const nameSubmit = document.getElementById('nameSubmit');
+        const nameInput = document.getElementById('nameInput');
+        if (nameSubmit) nameSubmit.addEventListener('click', () => this.handleNameSubmit());
+        if (nameInput) {
+            nameInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.handleNameSubmit();
+                }
+            });
+        }
         
         // Touch support for mobile
         let touchStartX = 0;
@@ -531,22 +545,14 @@ class Game2048 {
         }
     }
 
-    ensurePlayerName(force = false) {
+    ensurePlayerName(force = false, onReady = null) {
         if (!this.playerName || force) {
-            this.promptPlayerName();
+            this.showNameModal(onReady);
+            return false;
         }
         this.updateWelcomeMsg();
-    }
-
-    promptPlayerName() {
-        const input = prompt('Enter your name:', this.playerName || 'Player');
-        const name = (input || '').trim();
-        if (name) {
-            this.savePlayerName(name);
-        } else if (!this.playerName) {
-            this.savePlayerName('Player');
-        }
-        this.updateWelcomeMsg();
+        if (onReady) onReady();
+        return true;
     }
 
     updateWelcomeMsg() {
@@ -556,6 +562,37 @@ class Game2048 {
             welcomeEl.textContent = `Welcome ${this.playerName}`;
         } else {
             welcomeEl.textContent = '';
+        }
+    }
+
+    showNameModal(afterSubmit = null) {
+        this.afterNameCallback = afterSubmit;
+        const modal = document.getElementById('nameModal');
+        const input = document.getElementById('nameInput');
+        if (modal) modal.classList.remove('hidden');
+        this.setControlsEnabled(false);
+        if (input) {
+            input.value = '';
+            setTimeout(() => input.focus(), 50);
+        }
+    }
+
+    hideNameModal() {
+        const modal = document.getElementById('nameModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    handleNameSubmit() {
+        const input = document.getElementById('nameInput');
+        const name = (input && input.value ? input.value : '').trim() || 'Player';
+        this.savePlayerName(name);
+        this.updateWelcomeMsg();
+        this.hideNameModal();
+        this.setControlsEnabled(true);
+        if (typeof this.afterNameCallback === 'function') {
+            const cb = this.afterNameCallback;
+            this.afterNameCallback = null;
+            cb();
         }
     }
 
@@ -651,15 +688,22 @@ class Game2048 {
     }
 
     restart() {
-        this.ensurePlayerName(true);
-        this.setControlsEnabled(true);
-        this.grid = Array(4).fill(null).map(() => Array(4).fill(0));
-        this.score = 0;
-        this.previousState = null;
-        this.hideMessage();
-        this.addRandomTile();
-        this.addRandomTile();
-        this.updateDisplay();
+        const reset = () => {
+            this.setControlsEnabled(true);
+            this.grid = Array(4).fill(null).map(() => Array(4).fill(0));
+            this.score = 0;
+            this.previousState = null;
+            this.hideMessage();
+            this.addRandomTile();
+            this.addRandomTile();
+            this.updateDisplay();
+        };
+
+        if (!this.ensurePlayerName(false, reset)) {
+            // ensurePlayerName will call reset after name submission via callback
+            return;
+        }
+        // if name already existed, reset was already called by ensurePlayerName
     }
 
     handleGameEnd(state) {
@@ -686,6 +730,7 @@ class Game2048 {
         this.showMessage('See you next time! 👋');
         setTimeout(() => {
             this.hideMessage();
+            this.showNameModal();
         }, 2000);
     }
 }
