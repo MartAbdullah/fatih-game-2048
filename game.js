@@ -229,7 +229,7 @@ class Game2048 {
     }
 
     showHint() {
-        const best = self.findBestMove ? this.findBestMove() : null;
+        const best = this.findBestMove();
         if (!best || !best.moved) {
             this.clearHints();
             this.showHintPopup('No moves available');
