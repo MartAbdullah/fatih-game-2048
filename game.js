@@ -555,6 +555,30 @@ class Game2048 {
             li.appendChild(scoreSpan);
             list.appendChild(li);
         });
+
+        // Also update the persistent widget
+        const widgetList = document.getElementById('leaderboardWidget');
+        if (widgetList) {
+            widgetList.innerHTML = '';
+            if (!this.leaderboard.length) {
+                const li = document.createElement('li');
+                li.textContent = 'No scores yet';
+                widgetList.appendChild(li);
+            } else {
+                this.leaderboard.forEach(item => {
+                    const li = document.createElement('li');
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className = 'name';
+                    nameSpan.textContent = item.name;
+                    const scoreSpan = document.createElement('span');
+                    scoreSpan.className = 'score';
+                    scoreSpan.textContent = item.score;
+                    li.appendChild(nameSpan);
+                    li.appendChild(scoreSpan);
+                    widgetList.appendChild(li);
+                });
+            }
+        }
     }
 
     updateBestScore() {
@@ -601,6 +625,7 @@ class Game2048 {
     }
 
     restart() {
+        this.ensurePlayerName(true);
         this.grid = Array(4).fill(null).map(() => Array(4).fill(0));
         this.score = 0;
         this.previousState = null;
