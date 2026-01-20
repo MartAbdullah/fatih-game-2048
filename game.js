@@ -512,6 +512,7 @@ class Game2048 {
         if (!this.playerName || force) {
             this.promptPlayerName();
         }
+        this.updateWelcomeMsg();
     }
 
     promptPlayerName() {
@@ -521,6 +522,14 @@ class Game2048 {
             this.savePlayerName(name);
         } else if (!this.playerName) {
             this.savePlayerName('Player');
+        }
+        this.updateWelcomeMsg();
+    }
+
+    updateWelcomeMsg() {
+        const welcomeEl = document.getElementById('welcomeMsg');
+        if (welcomeEl && this.playerName) {
+            welcomeEl.textContent = `Welcome ${this.playerName}`;
         }
     }
 

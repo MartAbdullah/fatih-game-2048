@@ -32,7 +32,13 @@ body {
     font-weight: bold;
     color: #f65e3b;
 }
-
+.welcome-msg {
+    font-size: 16px;
+    color: #9f8a76;
+    text-align: center;
+    margin-top: 8px;
+    font-weight: 500;
+}
 .scores {
     display: flex;
     gap: 10px;
