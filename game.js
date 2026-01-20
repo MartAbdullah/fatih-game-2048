@@ -36,6 +36,10 @@ class Game2048 {
             btn.addEventListener('click', () => this.restart());
         });
         document.getElementById('undoBtn').addEventListener('click', () => this.undo());
+        const shuffleBtn = document.getElementById('shuffleBtn');
+        if (shuffleBtn) shuffleBtn.addEventListener('click', () => this.shuffle());
+        const gridBtn = document.getElementById('gridBtn');
+        if (gridBtn) gridBtn.addEventListener('click', () => this.toggleGrid());
         
         // Touch support for mobile
         let touchStartX = 0;
@@ -72,6 +76,40 @@ class Game2048 {
             touchStartX = 0;
             touchStartY = 0;
         });
+    }
+
+    shuffle() {
+        // Save state for undo
+        this.savePreviousState();
+        // Collect all non-zero values
+        const values = [];
+        for (let r = 0; r < 4; r++) {
+            for (let c = 0; c < 4; c++) {
+                if (this.grid[r][c] !== 0) values.push(this.grid[r][c]);
+            }
+        }
+        // Create list of all positions and shuffle
+        const positions = [];
+        for (let r = 0; r < 4; r++) {
+            for (let c = 0; c < 4; c++) positions.push({ r, c });
+        }
+        for (let i = positions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [positions[i], positions[j]] = [positions[j], positions[i]];
+        }
+        // Reset grid to zeros
+        this.grid = Array(4).fill(null).map(() => Array(4).fill(0));
+        // Place values in random positions
+        for (let i = 0; i < values.length; i++) {
+            const p = positions[i];
+            this.grid[p.r][p.c] = values[i];
+        }
+        this.updateDisplay();
+    }
+
+    toggleGrid() {
+        // Toggle helper outline for tiles
+        this.gameBoard.classList.toggle('show-grid');
     }
 
     handleKeyPress(e) {
@@ -231,13 +269,19 @@ class Game2048 {
                 
                 if (value === 0) {
                     tile.textContent = '';
+                    // Reset classes and attributes to base empty cell
                     tile.className = 'tile';
-                    // Remove previous color/state
                     tile.removeAttribute('data-value');
+                    // Ensure no inline styles linger
+                    tile.style.removeProperty('background');
+                    tile.style.removeProperty('color');
                 } else {
                     tile.textContent = value;
                     tile.className = 'tile active';
                     tile.setAttribute('data-value', value);
+                    // Ensure inline styles are not conflicting
+                    tile.style.removeProperty('background');
+                    tile.style.removeProperty('color');
                 }
                 
                 index++;
