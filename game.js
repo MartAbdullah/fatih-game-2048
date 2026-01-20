@@ -42,6 +42,8 @@ class Game2048 {
             btn.addEventListener('click', () => this.restart());
         });
         document.getElementById('undoBtn').addEventListener('click', () => this.undo());
+        const exitBtn = document.getElementById('exitBtn');
+        if (exitBtn) exitBtn.addEventListener('click', () => this.exitGame());
         const shuffleBtn = document.getElementById('shuffleBtn');
         if (shuffleBtn) shuffleBtn.addEventListener('click', () => this.shuffle());
         const gridBtn = document.getElementById('gridBtn');
@@ -639,6 +641,14 @@ class Game2048 {
         const text = state === 'win' ? 'You Win! 🎉' : 'Game Over!';
         this.updateLeaderboard();
         this.showMessage(text);
+    }
+
+    exitGame() {
+        this.hideMessage();
+        this.showMessage('See you next time! 👋');
+        setTimeout(() => {
+            this.hideMessage();
+        }, 2000);
     }
 }
 
