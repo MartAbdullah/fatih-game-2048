@@ -597,11 +597,13 @@ class Game2048 {
         this.savePlayerName(name);
         this.updateWelcomeMsg();
         this.hideNameModal();
-        this.setControlsEnabled(true);
+        
         if (typeof this.afterNameCallback === 'function') {
             const cb = this.afterNameCallback;
             this.afterNameCallback = null;
             cb();
+        } else {
+            this.setControlsEnabled(true);
         }
     }
 
