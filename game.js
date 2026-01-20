@@ -18,16 +18,25 @@ class Game2048 {
     }
 
     init() {
-        this.ensurePlayerName();
-        this.createBoard();
-        this.addRandomTile();
-        this.addRandomTile();
-        this.updateDisplay();
+        this.setControlsEnabled(false);
+        const startGame = () => {
+            this.createBoard();
+            this.addRandomTile();
+            this.addRandomTile();
+            this.updateDisplay();
+            this.updateBestScore();
+            this.renderLeaderboard();
+            this.setControlsEnabled(true);
+        };
+
         this.setupEventListeners();
-        this.updateBestScore();
-        this.renderLeaderboard();
-        this.setControlsEnabled(true);
-        this.ensurePlayerName(false);
+
+        if (!this.ensurePlayerName(false, startGame)) {
+            // Name modal will call startGame after submission
+            return;
+        }
+
+        startGame();
     }
 
     createBoard() {
