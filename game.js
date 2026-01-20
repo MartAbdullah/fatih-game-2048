@@ -11,6 +11,7 @@ class Game2048 {
         this.hintTimeout = null;
         this.leaderboard = this.loadLeaderboard();
         this.playerName = this.loadPlayerName();
+        this.isActive = true;
         
         this.init();
     }
@@ -24,6 +25,7 @@ class Game2048 {
         this.setupEventListeners();
         this.updateBestScore();
         this.renderLeaderboard();
+        this.setControlsEnabled(true);
     }
 
     createBoard() {
@@ -54,11 +56,13 @@ class Game2048 {
         let touchStartY = 0;
         
         this.gameBoard.addEventListener('touchstart', (e) => {
+            if (!this.isActive) return;
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
         });
         
         this.gameBoard.addEventListener('touchend', (e) => {
+            if (!this.isActive) return;
             if (!touchStartX || !touchStartY) return;
             
             const touchEndX = e.changedTouches[0].clientX;
@@ -87,6 +91,7 @@ class Game2048 {
     }
 
     shuffle() {
+        if (!this.isActive) return;
         // Save state for undo
         this.savePreviousState();
         // Collect all non-zero values
@@ -251,6 +256,7 @@ class Game2048 {
     }
 
     showHint() {
+        if (!this.isActive) return;
         const best = this.findBestMove();
         if (!best || !best.moved) {
             this.clearHints();
@@ -285,6 +291,7 @@ class Game2048 {
     }
 
     handleKeyPress(e) {
+        if (!this.isActive) return;
         if (e.key === 'ArrowUp') {
             e.preventDefault();
             this.move('up');
@@ -301,6 +308,7 @@ class Game2048 {
     }
 
     move(direction) {
+        if (!this.isActive) return;
         this.savePreviousState();
         let moved = false;
 
@@ -329,6 +337,7 @@ class Game2048 {
     }
 
     undo() {
+        if (!this.isActive) return;
         if (this.previousState) {
             this.grid = this.previousState.grid;
             this.score = this.previousState.score;
@@ -464,6 +473,18 @@ class Game2048 {
         this.updateBestScore();
     }
 
+    setControlsEnabled(enabled) {
+        this.isActive = enabled;
+        const ids = ['undoBtn', 'shuffleBtn', 'gridBtn'];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.disabled = !enabled;
+        });
+        if (this.gameBoard) {
+            this.gameBoard.classList.toggle('disabled', !enabled);
+        }
+    }
+
     // --- Leaderboard ---
     loadLeaderboard() {
         try {
@@ -530,8 +551,11 @@ class Game2048 {
 
     updateWelcomeMsg() {
         const welcomeEl = document.getElementById('welcomeMsg');
-        if (welcomeEl && this.playerName) {
+        if (!welcomeEl) return;
+        if (this.playerName) {
             welcomeEl.textContent = `Welcome ${this.playerName}`;
+        } else {
+            welcomeEl.textContent = '';
         }
     }
 
@@ -628,6 +652,7 @@ class Game2048 {
 
     restart() {
         this.ensurePlayerName(true);
+        this.setControlsEnabled(true);
         this.grid = Array(4).fill(null).map(() => Array(4).fill(0));
         this.score = 0;
         this.previousState = null;
@@ -644,16 +669,23 @@ class Game2048 {
     }
 
     exitGame() {
+        this.hideMessage();
+        this.clearHints();
+        this.setControlsEnabled(false);
+        this.playerName = '';
+        try {
+            localStorage.removeItem('playerName');
+        } catch (e) {
+            console.error('Failed to clear player name', e);
+        }
+        this.updateWelcomeMsg();
+        this.grid = Array(4).fill(null).map(() => Array(4).fill(0));
+        this.score = 0;
+        this.previousState = null;
+        this.updateDisplay();
         this.showMessage('See you next time! 👋');
         setTimeout(() => {
             this.hideMessage();
-            this.ensurePlayerName(true);
-            this.grid = Array(4).fill(null).map(() => Array(4).fill(0));
-            this.score = 0;
-            this.previousState = null;
-            this.addRandomTile();
-            this.addRandomTile();
-            this.updateDisplay();
         }, 2000);
     }
 }

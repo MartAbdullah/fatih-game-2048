@@ -114,6 +114,11 @@ body {
     aspect-ratio: 1;
 }
 
+.game-board.disabled {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
 .tile {
     background: #cdc1b4;
     border-radius: 3px;
@@ -166,6 +171,11 @@ body {
     justify-content: center;
     gap: 10px;
     margin-top: 20px;
+}
+
+.control-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 .leaderboard-widget {
