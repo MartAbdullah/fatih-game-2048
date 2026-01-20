@@ -647,6 +647,7 @@ class Game2048 {
         this.showMessage('See you next time! 👋');
         setTimeout(() => {
             this.hideMessage();
+            this.ensurePlayerName(true);
             this.grid = Array(4).fill(null).map(() => Array(4).fill(0));
             this.score = 0;
             this.previousState = null;
