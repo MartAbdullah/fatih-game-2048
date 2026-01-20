@@ -739,7 +739,16 @@ class Game2048 {
         this.showMessage('See you next time! 👋');
         setTimeout(() => {
             this.hideMessage();
-            this.showNameModal();
+            const startNewGame = () => {
+                this.grid = Array(4).fill(null).map(() => Array(4).fill(0));
+                this.score = 0;
+                this.previousState = null;
+                this.addRandomTile();
+                this.addRandomTile();
+                this.updateDisplay();
+                this.setControlsEnabled(true);
+            };
+            this.showNameModal(startNewGame);
         }, 2000);
     }
 }
