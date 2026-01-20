@@ -275,7 +275,7 @@ class Game2048 {
             }
         }
 
-        this.showMessage('Game Over!');
+        this.showMessage('Spel Afgelopen!');
     }
 
     showMessage(text) {

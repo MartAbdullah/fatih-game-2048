@@ -1,30 +1,30 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game of Fatih</title>
+    <title>Spel van Fatih</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="title">Game of Fatih</div>
+            <div class="title">Spel van Fatih</div>
             <div class="scores">
                 <div class="score-container">
                     <div class="score-label">SCORE</div>
                     <div id="score" class="score-value">0</div>
                 </div>
                 <div class="score-container">
-                    <div class="score-label">BEST</div>
+                    <div class="score-label">BESTE</div>
                     <div id="best" class="score-value">0</div>
                 </div>
             </div>
         </div>
         
         <div class="game-intro">
-            <p>Karoları birleştirmek için <strong>ok tuşlarını</strong> kullanın!</p>
-            <button id="newGame" class="new-game-btn">Yeni Oyun</button>
+            <p>Gebruik <strong>pijltjestoetsen</strong> om tegels te combineren!</p>
+            <button id="newGame" class="new-game-btn">Nieuw Spel</button>
         </div>
 
         <div id="gameBoard" class="game-board">
@@ -32,14 +32,14 @@
         </div>
 
         <div class="game-controls">
-            <button id="undoBtn" class="control-btn" title="Geri Al">↶</button>
-            <button id="shuffleBtn" class="control-btn" title="Karıştır">⇄</button>
-            <button id="gridBtn" class="control-btn" title="Grid">⚏</button>
+            <button id="undoBtn" class="control-btn" title="Ongedaan maken">↶</button>
+            <button id="shuffleBtn" class="control-btn" title="Schudden">⇄</button>
+            <button id="gridBtn" class="control-btn" title="Rooster">⚏</button>
         </div>
 
         <div class="game-message" id="gameMessage">
             <p></p>
-            <button class="retry-btn">Tekrar Dene</button>
+            <button class="retry-btn">Opnieuw Proberen</button>
         </div>
     </div>
 
