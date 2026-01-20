@@ -271,7 +271,7 @@ class Game2048 {
         const text = `Hint: ${best.direction.toUpperCase()} ${arrowMap[best.direction]}`;
         this.showHintPopup(text);
         // auto-clear tile hints after a while
-        setTimeout(() => this.clearHints(), 1200);
+        setTimeout(() => this.clearHints(), 2000);
     }
 
     showHintPopup(text) {
@@ -644,11 +644,16 @@ class Game2048 {
     }
 
     exitGame() {
-        this.hideMessage();
         this.showMessage('See you next time! 👋');
         setTimeout(() => {
             this.hideMessage();
-        }, 2000);
+            this.grid = Array(4).fill(null).map(() => Array(4).fill(0));
+            this.score = 0;
+            this.previousState = null;
+            this.addRandomTile();
+            this.addRandomTile();
+            this.updateDisplay();
+        }, 4000);
     }
 }
 
