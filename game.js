@@ -232,6 +232,8 @@ class Game2048 {
                 if (value === 0) {
                     tile.textContent = '';
                     tile.className = 'tile';
+                    // Remove previous color/state
+                    tile.removeAttribute('data-value');
                 } else {
                     tile.textContent = value;
                     tile.className = 'tile active';
